@@ -1,25 +1,31 @@
 #include <stdio.h>
 #include "sys_plat.h"
 
+static sys_sem_t sem;
 void thread1_entry(void * arg)
 {
     while (1)
     {
         plat_printf("this is thread1 %s\n", (char *)arg);
-        sys_sleep(100);
+        sys_sleep(1000);
+        sys_sem_notify(sem);
+        sys_sleep(1000);
     }
 }
 
 void thread2_entry(void * arg)
 {
     while (1)
-    {
+    {   
+        //0 value means wait all the time
+        sys_sem_wait(sem, 0);
         plat_printf("this is thread2 %s\n", (char *)arg);
-        sys_sleep(100);
     }
 }
 int main(void)
 {   
+    //0 value means stop thead2 from start moment
+    sem = sys_sem_create(0);
     //thread example
     sys_thread_create(thread1_entry, "aaaa");
     sys_thread_create(thread2_entry, "bbbb");
