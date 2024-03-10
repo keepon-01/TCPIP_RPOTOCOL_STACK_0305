@@ -2,8 +2,17 @@
 #include "sys_plat.h"
 
 static sys_sem_t sem;
+static sys_mutex_t mutex;
+static int count = 0;
 void thread1_entry(void * arg)
-{
+{   
+    for(int i = 0; i < 100; i++)
+    {
+        sys_mutex_lock(mutex);
+        count++;
+        sys_mutex_free(mutex);
+    }
+    plat_printf("count value %d", count);
     while (1)
     {
         plat_printf("this is thread1 %s\n", (char *)arg);
@@ -15,6 +24,13 @@ void thread1_entry(void * arg)
 
 void thread2_entry(void * arg)
 {
+    for(int i = 0; i < 100; i++)
+    {
+        sys_mutex_lock(mutex);
+        count--;
+        sys_mutex_free(mutex);
+    }
+    plat_printf("count value %d", count);
     while (1)
     {   
         //0 value means wait all the time
@@ -26,6 +42,10 @@ int main(void)
 {   
     //0 value means stop thead2 from start moment
     sem = sys_sem_create(0);
+
+    //mutex
+    mutex = sys_mutex_create();
+
     //thread example
     sys_thread_create(thread1_entry, "aaaa");
     sys_thread_create(thread2_entry, "bbbb");
