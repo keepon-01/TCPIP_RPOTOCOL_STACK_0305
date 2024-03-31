@@ -68,7 +68,7 @@ net_err_t fixq_send(fixq_t *q, void *msg, int tmo) {
         nlocker_unlock(&q->locker);
         return NET_ERR_FULL;
     }
-    nlocker_unlock(&q->locker);
+    nlocker_unlock(&q->locker);//这里和79行的unlock两者不可以省掉，因为可能导致死锁，拿了队列的锁，然耨再74行一直等待空闲的，这个时候别的人拿不到队列的锁，所以就一直卡住，所以锁的粒度是能小则小
 
     // 消耗掉一个空闲资源，如果为空则会等待
     if (sys_sem_wait(q->send_sem, tmo) < 0) {
